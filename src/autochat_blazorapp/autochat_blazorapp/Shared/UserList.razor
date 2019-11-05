@@ -1,0 +1,35 @@
+﻿@using autochat_blazorapp.Data
+@inject UserListService ListSerivce
+
+<h3>UserList</h3>
+
+@if (users == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <tbody>
+            @foreach (var user in users)
+            {
+                <tr>
+                    <td>
+                        @user
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    String[] users;
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.users = await ListSerivce.GetUserListAsync();
+        Console.WriteLine("------------ ON Init");
+    }
+}

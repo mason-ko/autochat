@@ -24,6 +24,7 @@ namespace autochat_blazorapp.Pages
                 pageHandler: "Callback",
                 values: new { returnUrl }),
             };
+
             return new ChallengeResult(provider, authenticationProperties);
         }
         public async Task<IActionResult> OnGetCallbackAsync(

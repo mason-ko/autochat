@@ -10,6 +10,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using autochat_blazorapp.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
+using System.Net.Http;
 
 namespace autochat_blazorapp
 {
@@ -29,6 +33,28 @@ namespace autochat_blazorapp
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
+
+
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+              .AddCookie();
+            services.AddAuthentication().AddGoogle(options =>
+            {
+                options.ClientId = Configuration["Google:ClientId"];
+                options.ClientSecret = Configuration["Google:ClientSecret"];
+                options.ClaimActions.MapJsonKey("urn:google:profile", "link");
+                options.ClaimActions.MapJsonKey("urn:google:image", "picture");
+            });
+            // From: https://github.com/aspnet/Blazor/issues/1554
+            // Adds HttpContextAccessor
+            // Used to determine if a user is logged in
+            // and what their username is
+            services.AddHttpContextAccessor();
+            services.AddScoped<HttpContextAccessor>();
+            // Required for HttpClient support in the Blazor Client project
+            services.AddHttpClient();
+            services.AddScoped<HttpClient>();
+            // Pass settings to other components
+            services.AddSingleton<IConfiguration>(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -44,6 +70,9 @@ namespace autochat_blazorapp
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+            app.UseCookiePolicy();
+            app.UseAuthentication();
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();

@@ -1,4 +1,5 @@
-﻿@page "/chat"
+﻿@page "/chat2"
+@using Microsoft.AspNetCore.SignalR.Client
 
 <div class="container">
     <div class="row">&nbsp;</div>
@@ -28,6 +29,21 @@
     </div>
 </div>
 
+@code {
+    HubConnection connection;
 
-<script src="~/js/signalr/dist/browser/signalr.js"></script>
-<script src="~/js/chat.js"></script>
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        Console.WriteLine("Go Chat2");
+
+        connection = new HubConnectionBuilder().WithUrl("https://localhost:5001/chatHub").Build();
+        connection.On<string, string>("ReceiveMessage", (user,message) =>
+        {
+            Console.WriteLine($"ReceiveMessage2: {user} ,{message}");
+        });
+
+        await connection.StartAsync();
+    }
+}

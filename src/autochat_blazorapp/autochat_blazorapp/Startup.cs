@@ -37,6 +37,8 @@ namespace autochat_blazorapp
 
             services.AddSingleton<UserListService>();
 
+            services.AddControllers();
+
             services.AddSignalR();
 
             
@@ -85,12 +87,13 @@ namespace autochat_blazorapp
             app.UseStaticFiles();
 
             app.UseRouting();
-
+            
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
                 endpoints.MapHub<ChatHub>("/chatHub");
+                endpoints.MapControllers();
             });
         }
     }

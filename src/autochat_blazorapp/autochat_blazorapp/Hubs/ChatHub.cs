@@ -14,6 +14,8 @@ namespace autochat_blazorapp.Hubs
 
             //SendMessage("system", $"{Context.ConnectionId} joined");
 
+            
+
             return base.OnConnectedAsync();
         }
 

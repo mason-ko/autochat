@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using System.Net.Http;
+using autochat_blazorapp.Hubs;
 
 namespace autochat_blazorapp
 {
@@ -35,6 +36,11 @@ namespace autochat_blazorapp
             services.AddSingleton<WeatherForecastService>();
 
             services.AddSingleton<UserListService>();
+
+            services.AddSignalR();
+
+            
+            // Google Login
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
               .AddCookie();
@@ -84,6 +90,7 @@ namespace autochat_blazorapp
             {
                 endpoints.MapBlazorHub();
                 endpoints.MapFallbackToPage("/_Host");
+                endpoints.MapHub<ChatHub>("/chatHub");
             });
         }
     }

@@ -22,7 +22,12 @@ namespace autochat_blazorapp
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder.ConfigureKestrel(serverOptions =>
+                    {
+                        // Set properties and call methods on options
+                    })
+                    .UseIISIntegration()
+                    .UseStartup<Startup>();
                 });
     }
 }

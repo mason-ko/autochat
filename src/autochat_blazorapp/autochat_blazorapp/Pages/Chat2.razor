@@ -1,20 +1,21 @@
 ﻿@page "/chat2"
 @using Microsoft.AspNetCore.SignalR.Client
+@using Microsoft.AspNetCore.Mvc
 
 <div class="container">
     <div class="row">&nbsp;</div>
     <div class="row">
         <div class="col-2">User</div>
-        <div class="col-4"><input type="text" id="userInput" /></div>
+        <div class="col-4"><input type="text" id="userInput" @bind="user"/></div>
     </div>
     <div class="row">
         <div class="col-2">Message</div>
-        <div class="col-4"><input type="text" id="messageInput" /></div>
+        <div class="col-4"><input type="text" id="messageInput" @bind="message"/></div>
     </div>
     <div class="row">&nbsp;</div>
     <div class="row">
         <div class="col-6">
-            <input type="button" id="sendButton" value="Send Message" />
+            <input type="button" id="sendButton" value="Send Message" @onclick="SendMessage"/>
         </div>
     </div>
 </div>
@@ -25,25 +26,44 @@
 </div>
 <div class="row">
     <div class="col-6">
-        <ul id="messagesList"></ul>
+        @*<ul id="messagesList"></ul>*@
+
+        <ul>
+            @foreach (var message in messages)
+            {
+              <li>@message</li>
+            }
+        </ul>
     </div>
 </div>
 
 @code {
     HubConnection connection;
+    string user;
+    string message;
+    List<string> messages;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
-        Console.WriteLine("Go Chat2");
+        Console.WriteLine("-----------Go Chat2");
+        
+        messages = new List<string>();
 
         connection = new HubConnectionBuilder().WithUrl("https://localhost:5001/chatHub").Build();
         connection.On<string, string>("ReceiveMessage", (user,message) =>
         {
-            Console.WriteLine($"ReceiveMessage2: {user} ,{message}");
+            Console.WriteLine($"ReceiveMessage2: {user} ,{message}");            
+            messages.Add($"{user} says {message}");
         });
 
         await connection.StartAsync();
+    }
+
+    async void SendMessage()
+    {
+        Console.WriteLine($"User: {user}, M: {message}");
+        await connection.SendAsync("SendMessage", user, message);
     }
 }

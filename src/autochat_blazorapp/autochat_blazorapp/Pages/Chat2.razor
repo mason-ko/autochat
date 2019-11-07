@@ -56,6 +56,8 @@
         {
             Console.WriteLine($"ReceiveMessage2: {user} ,{message}");            
             messages.Add($"{user} says {message}");
+
+            StateHasChanged();
         });
 
         await connection.StartAsync();

@@ -1,6 +1,9 @@
 ﻿@using autochat_blazorapp.Data
 @using autochat_blazorapp.Models
+@using autochat_blazorapp.Common
+@using Microsoft.AspNetCore.Http
 @inject AccountContext Context
+@inject IHttpContextAccessor httpContextAccessor
 
 @if (isLogined)
 {
@@ -18,13 +21,13 @@ else
         <input type="password" @bind="account.Password" />
     </div>
 
-    
+
     <input type="button" value="Login" @onclick="@Login" />
-        
+
     <NavLink class="nav-link" href="/account/create" Match="NavLinkMatch.All">
         <span class="oi oi-home" aria-hidden="true"></span> Join
     </NavLink>
-    
+
 
 }
 
@@ -32,17 +35,37 @@ else
     Account account = new Account();
     bool isLogined = false;
 
+    protected override void OnInitialized()
+    {
+        if(httpContextAccessor.HttpContext.Items
+    .TryGetValue(HttpContextItemsMiddleware.HttpContextItemsMiddlewareKey,
+        out var middlewareSetValue))
+        {
+            account.UserName = Convert.ToString(middlewareSetValue);
+            this.isLogined = true;
+        }
+        else
+        {
+            this.isLogined = false;
+        }
+    }
+
     void Login()
     {
         if (string.IsNullOrWhiteSpace(account.Id) || string.IsNullOrWhiteSpace(account.Password)) return;
 
         var findUser = Context.Account.FirstOrDefault(x => x.Id.Equals(account.Id) && x.Password.Equals(account.Password));
-        
+
         if (findUser != null)
         {
             //true
             this.isLogined = true;
             this.account = findUser;
+
+            httpContextAccessor.HttpContext.Items[HttpContextItemsMiddleware.HttpContextItemsMiddlewareKey] = account.Id;            
+            // httpContextAccessor.HttpContext.Session.SetString(AccountIdString, account.Id);
+            // httpContextAccessor.HttpContext.Session.SetString(AccountUserNameString, account.UserName);
+
             return;
         }
         else
@@ -56,5 +79,7 @@ else
         this.isLogined = false;
         account.Password = "";
         account.UserName = "";
+
+        httpContextAccessor.HttpContext.Items[HttpContextItemsMiddleware.HttpContextItemsMiddlewareKey] = ""; 
     }
 }

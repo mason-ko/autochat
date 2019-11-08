@@ -1,71 +1,103 @@
 ﻿@page "/chat2"
 @using Microsoft.AspNetCore.SignalR.Client
 @using Microsoft.AspNetCore.Mvc
+@using autochat_blazorapp.Data
+@using autochat_blazorapp.Models
+@using autochat_blazorapp.Common
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor httpContextAccessor
 
-<div class="container">
-    <div class="row">&nbsp;</div>
-    <div class="row">
-        <div class="col-2">User</div>
-        <div class="col-4"><input type="text" id="userInput" @bind="user"/></div>
-    </div>
-    <div class="row">
-        <div class="col-2">Message</div>
-        <div class="col-4"><input type="text" id="messageInput" @bind="message"/></div>
-    </div>
-    <div class="row">&nbsp;</div>
-    <div class="row">
-        <div class="col-6">
-            <input type="button" id="sendButton" value="Send Message" @onclick="SendMessage"/>
-        </div>
-    </div>
+<div class="top-row px-4">
+    <p>You are connected as <b>@user</b></p>
+    <button class="btn btn-sm btn-warning ml-md-auto" @onclick="@Disconnect">Disconnect</button>
 </div>
-<div class="row">
-    <div class="col-12">
-        <hr />
-    </div>
-</div>
-<div class="row">
-    <div class="col-6">
-        @*<ul id="messagesList"></ul>*@
 
-        <ul>
-            @foreach (var message in messages)
+
+<div class="content px-4">
+        <div id="scrollbox">
+
+            @foreach (var item in messages)
             {
-              <li>@message</li>
+                <div class="@item.CSS">
+                    <div class="user">@item.Username</div>
+                    <div class="msg">@item.Body</div>
+                </div>
             }
-        </ul>
-    </div>
+            <hr />
+            <textarea class="input-lg" placeholder="enter your comment" @bind="@message"></textarea>
+            <button class="btn btn-default" @onclick="@SendMessage">Send</button>
+        </div>
 </div>
 
 @code {
     HubConnection connection;
     string user;
     string message;
-    List<string> messages;
+    List<Message> messages;
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
-        Console.WriteLine("-----------Go Chat2");
-        
-        messages = new List<string>();
+        if (httpContextAccessor.HttpContext.Items
+     .TryGetValue(HttpContextItemsMiddleware.HttpContextItemsMiddlewareKey,
+         out var middlewareSetValue))
+        {
+            user = Convert.ToString(middlewareSetValue);
+        }
+
+        messages = new List<Message>();
 
         connection = new HubConnectionBuilder().WithUrl("https://localhost:5001/chatHub").Build();
-        connection.On<string, string>("ReceiveMessage", (user,message) =>
+        connection.On<string, string>("ReceiveMessage", (username, message) =>
         {
-            Console.WriteLine($"ReceiveMessage2: {user} ,{message}");            
-            messages.Add($"{user} says {message}");
-
+            var isMine = string.Equals(username, this.user, StringComparison.CurrentCultureIgnoreCase);
+            var newMsg = new Message(username, message, isMine);
+            messages.Add(newMsg);
             StateHasChanged();
         });
 
         await connection.StartAsync();
+        await Register();
+    }
+
+    async Task Register()
+    {
+        await connection.SendAsync("Register", user);
     }
 
     async void SendMessage()
     {
-        Console.WriteLine($"User: {user}, M: {message}");
         await connection.SendAsync("SendMessage", user, message);
+    }
+
+    void Disconnect()
+    {
+
+    }
+
+    class Message
+    {
+        public Message(string username, string body, bool mine)
+        {
+            Username = username;
+            Body = body;
+            Mine = mine;
+        }
+
+        public string Username { get; set; }
+        public string Body { get; set; }
+        public bool Mine { get; set; }
+
+        /// <summary>
+        /// Determine CSS classes to use for message div
+        /// </summary>
+        public string CSS
+        {
+            get
+            {
+                return Mine ? "sent" : "received";
+            }
+        }
     }
 }

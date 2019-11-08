@@ -17,6 +17,7 @@ using System.Net.Http;
 using autochat_blazorapp.Hubs;
 using Microsoft.EntityFrameworkCore;
 using autochat_blazorapp.Models;
+using autochat_blazorapp.Common;
 
 namespace autochat_blazorapp
 {
@@ -43,7 +44,21 @@ namespace autochat_blazorapp
 
             services.AddSignalR();
 
-            
+
+            services.AddDistributedMemoryCache();
+
+            services.AddSession(options =>
+            {
+                Console.WriteLine("기본 세션: " + options.IdleTimeout);
+                // Set a short timeout for easy testing.
+            //    options.IdleTimeout = TimeSpan.FromSeconds(10);
+                options.Cookie.HttpOnly = true;
+                // Make the session cookie essential
+                options.Cookie.IsEssential = true;
+            });
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+
+
             // Google Login
 
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -84,6 +99,9 @@ namespace autochat_blazorapp
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+            app.UseSession();
+            app.UseHttpContextItemsMiddleware();
 
             app.UseCookiePolicy();
             app.UseAuthentication();

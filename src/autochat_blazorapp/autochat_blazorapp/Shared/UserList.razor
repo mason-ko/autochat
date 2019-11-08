@@ -1,5 +1,7 @@
 ﻿@using autochat_blazorapp.Data
-@inject UserListService ListSerivce
+@using Microsoft.EntityFrameworkCore;
+
+@inject AccountContext Context
 
 <h3>UserList</h3>
 
@@ -29,7 +31,10 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        this.users = await ListSerivce.GetUserListAsync();
+        var accounts = await Context.Account.ToListAsync();
+        this.users = accounts.Select(x => x.UserName).ToArray();
+        //.Select(x => x.UserName).ToArray();
+
         Console.WriteLine("------------ ON Init");
     }
 }

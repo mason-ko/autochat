@@ -1,0 +1,42 @@
+﻿@page "/account/create"
+@using autochat_blazorapp.Data
+@using autochat_blazorapp.Models
+@inject AccountContext Context
+
+<h3>AccountCreate</h3>
+
+<div>
+    <span>Id</span>
+    <input type="text" @bind="account.Id" />
+    <span>User Name</span>
+    <input type="text" @bind="account.UserName" />
+    <span>Password</span>
+    <input type="password" @bind="account.Password" />
+</div>
+
+<div>    
+    <Button value="Save" @onclick="@Save" />
+</div>
+
+@code {
+    Account account = new Account();
+
+    void Save()
+    {
+        if (string.IsNullOrWhiteSpace(account.Id) || string.IsNullOrWhiteSpace(account.UserName) ||
+            string.IsNullOrWhiteSpace(account.Password)) return;
+
+        Console.WriteLine($"!zz : {account.Id}");
+
+        if(Context.Account.Any(x=> x.Id.Equals(account.Id)))
+        {
+            //false
+            return;
+        }
+        else
+        {
+            Context.Account.Add(account);
+            Context.SaveChanges();
+        }
+    }
+}

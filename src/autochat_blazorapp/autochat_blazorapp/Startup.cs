@@ -15,6 +15,8 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using System.Net.Http;
 using autochat_blazorapp.Hubs;
+using Microsoft.EntityFrameworkCore;
+using autochat_blazorapp.Models;
 
 namespace autochat_blazorapp
 {
@@ -64,6 +66,9 @@ namespace autochat_blazorapp
             services.AddScoped<HttpClient>();
             // Pass settings to other components
             services.AddSingleton<IConfiguration>(Configuration);
+
+            services.AddDbContext<AccountContext>(options =>
+                    options.UseSqlServer(Configuration.GetConnectionString("AccountContext")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -1,4 +1,4 @@
-﻿@page "/chat2"
+﻿@page "/chat/{To}"
 @using Microsoft.AspNetCore.SignalR.Client
 @using Microsoft.AspNetCore.Mvc
 @using autochat_blazorapp.Data
@@ -8,7 +8,7 @@
 @inject IHttpContextAccessor httpContextAccessor
 
 <div class="top-row px-4">
-    <p>You are connected as <b>@user</b></p>
+    <p>You are connected as <b>@user</b> <p> To : </p> <b>@To</b></p>
     <button class="btn btn-sm btn-warning ml-md-auto" @onclick="@Disconnect">Disconnect</button>
 </div>
 
@@ -30,10 +30,12 @@
 </div>
 
 @code {
+    [Parameter]
+    public string To { get; set; }
+
     HubConnection connection;
     string user;
     string message;
-    string to;
     List<Message> messages;
 
     protected override async Task OnInitializedAsync()
@@ -69,9 +71,18 @@
 
     async void SendMessage()
     {
-        if (string.IsNullOrEmpty(to)) return;
+        if (string.IsNullOrEmpty(To)) return;
 
-        await connection.SendAsync("SendMessage", user, message, to);
+        await connection.SendAsync("SendMessage", user, message, To);
+        
+        MineAddLine(user, message);
+    }
+
+    void MineAddLine(string user, string message)
+    {
+        var newMsg = new Message(user, message, true);
+        messages.Add(newMsg);
+        StateHasChanged();
     }
 
     void Disconnect()

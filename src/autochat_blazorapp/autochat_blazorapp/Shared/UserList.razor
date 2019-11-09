@@ -5,7 +5,7 @@
 
 <h4>UserList</h4>
 
-@if (users == null)
+@if (accounts == null)
 {
     <p><em>Loading...</em></p>
 }
@@ -13,11 +13,11 @@ else
 {
     <table class="table">
         <tbody>
-            @foreach (var user in users)
+            @foreach (var user in accounts)
             {
                 <tr>
                     <td>
-                        @user
+                        @user.Id (@user.UserName)
                     </td>
                 </tr>
             }
@@ -27,14 +27,10 @@ else
 
 
 @code {
-    String[] users;
+    List<Models.Account> accounts;
 
     protected override async Task OnInitializedAsync()
     {
-        var accounts = await Context.Account.ToListAsync();
-        this.users = accounts.Select(x => x.UserName).ToArray();
-        //.Select(x => x.UserName).ToArray();
-
-        Console.WriteLine("------------ ON Init");
+        accounts = await Context.Account.ToListAsync();
     }
 }

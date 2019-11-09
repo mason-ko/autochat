@@ -33,6 +33,7 @@
     HubConnection connection;
     string user;
     string message;
+    string to;
     List<Message> messages;
 
     protected override async Task OnInitializedAsync()
@@ -68,7 +69,9 @@
 
     async void SendMessage()
     {
-        await connection.SendAsync("SendMessage", user, message);
+        if (string.IsNullOrEmpty(to)) return;
+
+        await connection.SendAsync("SendMessage", user, message, to);
     }
 
     void Disconnect()

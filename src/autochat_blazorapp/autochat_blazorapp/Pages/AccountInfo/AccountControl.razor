@@ -7,8 +7,10 @@
 
 @if (isLogined)
 {
+    <span> UserId: </span>
+    <b>@account.Id</b>
     <span type="@account" />
-    <span>Logined </span>
+    <span> Logined </span>
 
     <input type="button" value="Logout" @onclick="@Logout" />
 }
@@ -37,7 +39,7 @@ else
 
     protected override void OnInitialized()
     {
-        if(httpContextAccessor.HttpContext.Items
+        if (httpContextAccessor.HttpContext.Items
     .TryGetValue(HttpContextItemsMiddleware.HttpContextItemsMiddlewareKey,
         out var middlewareSetValue))
         {
@@ -62,7 +64,7 @@ else
             this.isLogined = true;
             this.account = findUser;
 
-            httpContextAccessor.HttpContext.Items[HttpContextItemsMiddleware.HttpContextItemsMiddlewareKey] = account.Id;            
+            httpContextAccessor.HttpContext.Items[HttpContextItemsMiddleware.HttpContextItemsMiddlewareKey] = account.Id;
             // httpContextAccessor.HttpContext.Session.SetString(AccountIdString, account.Id);
             // httpContextAccessor.HttpContext.Session.SetString(AccountUserNameString, account.UserName);
 
@@ -80,6 +82,6 @@ else
         account.Password = "";
         account.UserName = "";
 
-        httpContextAccessor.HttpContext.Items[HttpContextItemsMiddleware.HttpContextItemsMiddlewareKey] = ""; 
+        httpContextAccessor.HttpContext.Items[HttpContextItemsMiddleware.HttpContextItemsMiddlewareKey] = "";
     }
 }

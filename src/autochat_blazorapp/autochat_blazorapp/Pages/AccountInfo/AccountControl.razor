@@ -68,6 +68,8 @@ else
             // httpContextAccessor.HttpContext.Session.SetString(AccountIdString, account.Id);
             // httpContextAccessor.HttpContext.Session.SetString(AccountUserNameString, account.UserName);
 
+            StateHasChanged();
+
             return;
         }
         else

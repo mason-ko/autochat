@@ -1,11 +1,14 @@
 ﻿@using autochat_blazorapp.Data
 @using Microsoft.EntityFrameworkCore
 @using Microsoft.AspNetCore.Mvc
-
+@using Microsoft.AspNetCore.Http
+@using autochat_blazorapp.Common
+@inject IHttpContextAccessor httpContextAccessor
 @inject AccountContext Context
 
 
-<h4>UserList</h4>
+<h4 class="text-white p-1">UserList</h4>
+<input type="button" value="Refresh" @onclick="RefreshAsync" />
 
 @if (accounts == null)
 {
@@ -13,31 +16,60 @@
 }
 else
 {
-    <table class="table">
-        <tbody>
-            @foreach (var user in accounts)
+    <ul class="nav flex-column">
+        @foreach (var user in accounts)
+        {
+            @if (this.user == user.Id)
             {
-                <tr>
-                    <td>
-                        <a href="/chat/@user.Id">
-                            <span class="oi oi-plus" aria-hidden="true"></span> @user.Id (@user.UserName)
-                        </a>
-                    </td>
-                </tr>
+                //본인 계정은 pass
+                <li class="nav-item px-3 text-white">
+                    @user.Id (@user.UserName) - (Mine)
+                </li>
             }
-        </tbody>
-    </table>
-}
+            else
+            {
+                <li class="nav-item px-3">
+                    <a href="/chat/@user.Id">
+                        @user.Id (@user.UserName)
+                    </a>
+                </li>
+            }
+        }
+    </ul>    
 
+}
 
 @code {
     List<Models.Account> accounts;
+    string user;
 
     protected override async Task OnInitializedAsync()
     {
-        
-        accounts = await Context.Account.ToListAsync();
+        await RefreshAsync();
     }
 
+    async Task RefreshAsync()
+    {
+        if (httpContextAccessor.HttpContext.Items
+     .TryGetValue(HttpContextItemsMiddleware.HttpContextItemsMiddlewareKey,
+         out var middlewareSetValue))
+        {
+            this.user = Convert.ToString(middlewareSetValue);
+            accounts = await Context.Account.ToListAsync();
+        }
+    }
 
+    protected override void OnAfterRender(bool firstRender)
+    {
+        base.OnAfterRender(firstRender);
+
+        Console.WriteLine("OnAfterRender");
+    }
+
+    protected override bool ShouldRender()
+    {
+        Console.WriteLine("ShouldRender");
+
+        return base.ShouldRender();
+    }
 }

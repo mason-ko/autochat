@@ -6,27 +6,28 @@
 @using autochat_blazorapp.Common
 @using Microsoft.AspNetCore.Http
 @inject IHttpContextAccessor httpContextAccessor
+@inject NavigationManager NavigationManager
 
 <div class="top-row px-4">
     <p>You are connected as <b>@user</b> <p> To : </p> <b>@To</b></p>
-    <button class="btn btn-sm btn-warning ml-md-auto" @onclick="@Disconnect">Disconnect</button>
+    <button class="btn btn-sm btn-warning ml-md-auto" @onclick="@DisconnectAsync">Disconnect</button>
 </div>
 
 
 <div class="content px-4">
-        <div id="scrollbox">
+    <div id="scrollbox">
 
-            @foreach (var item in messages)
-            {
-                <div class="@item.CSS">
-                    <div class="user">@item.Username</div>
-                    <div class="msg">@item.Body</div>
-                </div>
-            }
-            <hr />
-            <textarea class="input-lg" placeholder="enter your comment" @bind="@message"></textarea>
-            <button class="btn btn-default" @onclick="@SendMessage">Send</button>
-        </div>
+        @foreach (var item in messages)
+        {
+            <div class="@item.CSS">
+                <div class="user">@item.Username</div>
+                <div class="msg">@item.Body</div>
+            </div>
+        }
+        <hr />
+        <textarea class="input-lg" placeholder="enter your comment" @bind="@message"></textarea>
+        <button class="btn btn-default" @onclick="@SendMessage">Send</button>
+    </div>
 </div>
 
 @code {
@@ -85,9 +86,12 @@
         StateHasChanged();
     }
 
-    void Disconnect()
+    async void DisconnectAsync()
     {
+        await connection.StopAsync();
+        await connection.DisposeAsync();
 
+         NavigationManager.NavigateTo("/");
     }
 
     class Message
